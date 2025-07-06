@@ -303,11 +303,6 @@ class Cog1(commands.Cog):
         embed.set_image(url=gif_url)
 
         await ctx.send(embed=embed, delete_after=60)
-        
-        # Schedule removal from used_gifs after cooldown
-        await asyncio.sleep(self.gif_cooldown)
-        if gif_url in self.used_gifs:
-            self.used_gifs.remove(gif_url)
 
 
     @commands.command(name="gay")
@@ -331,10 +326,6 @@ class Cog1(commands.Cog):
 
         await ctx.send(embed=embed, delete_after=60)
         
-        # Schedule removal from used_gifs after cooldown
-        await asyncio.sleep(self.gif_cooldown)
-        if gif_url in self.used_gifs:
-            self.used_gifs.remove(gif_url)
     
     @rape.error
     async def rape_error(self, ctx, error):
@@ -342,6 +333,13 @@ class Cog1(commands.Cog):
             minutes = int(error.retry_after // 60)
             seconds = int(error.retry_after % 60)
             await ctx.send(f"⏳ You need to wait {minutes}m {seconds}s before using `rape` again.", delete_after=10)
+
+    @gay.error
+    async def gay_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            minutes = int(error.retry_after // 60)
+            seconds = int(error.retry_after % 60)
+            await ctx.send(f"⏳ You need to wait {minutes}m {seconds}s before using `gay` again.", delete_after=10)
             
     @commands.command(name="testgifs")
     @commands.has_permissions(administrator=True)
