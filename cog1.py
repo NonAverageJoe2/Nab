@@ -313,8 +313,9 @@ class Cog1(commands.Cog):
     @commands.command(name="gay")
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def gay(self, ctx, target: discord.Member = None):
-        if ctx.author.id == "1387821242798833746":
+        if ctx.author.id == 1387821242798833746:
             await ctx.send("nuh uh <3", delete_after=30)
+            return
         if target is None:
             await ctx.send("You need to mention someone !", delete_after=30)
             return
