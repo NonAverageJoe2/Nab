@@ -20,7 +20,7 @@ class Cog1(commands.Cog):
         self.invite_cache = {}
         self.tracked_invite_code = "qnDWXbzywE"
         self.role_name = "lunatic"  # Role to assign
-        self.kiss_messages = [
+        self.rape_messages = [
             "{author} rapes {target} brutally",
             "{author} and {target} share a passionate rapesesh",
             "{author} sneakily rapes {target}",
@@ -37,6 +37,20 @@ class Cog1(commands.Cog):
             "{author} uses force to rape {target}, leaving them traumatized",
             "{author} rapes {target} repeatedly, causing them immense pain and suffering",
             "{author} rapes {target} at 5013 baldpate drive, corpus christi texas, 78413",
+        ]
+        self.rape_gifs = [
+            "https://tenor.com/view/anime-sniffing-anime-sniffa-anime-snif-anime-shy-anime-blushing-shy-gif-10251069066059279851",  # Replace with actual GIF URLs
+            "https://img4.gelbooru.com//images/2c/60/2c6097d3418da78adbe192edad63d54f.gif",
+            "https://img.xbooru.com//images/515/f2b190ece18afdf913c24385fb338e35.gif?563331",
+            "https://hentaidude.tv/hentai-anime/eroriman-2s-prostitute-lets-another-girl-watch/",
+            "https://img4.gelbooru.com//images/c8/62/c8629efe2abddfdc2e2e1e9485733666.gif",
+            "https://img4.gelbooru.com//samples/77/fe/sample_77fe9ba14dea38888e08d9e82c567d27.jpg",
+            "https://img4.gelbooru.com/images/4c/6d/4c6d755c877295cece288efaccee0e8d.gif",
+            "https://img4.gelbooru.com//images/c3/54/c3546b2689fd19d5c408f9b8e1f34ffb.gif",
+            "https://img4.gelbooru.com/images/0c/dc/0cdcc44257c5f51cc25ba640f8bf4a3a.gif",
+            "https://n1.kemono.su/data/6a/fc/6afcb8ccad73188a96b252be78c1e3ababada345a1b8a6f312af5ef36d0cc1a5.gif?f=Reisen+Tentacle+Pit+01.gif",
+            "https://24.media.tumblr.com/16ff3889dcfc9e34a75c836a85659457/tumblr_mn37lbOSxz1snbskwo1_500.gif",
+            # Add more GIF URLs here
         ]
 
     # --- Bump Reminder Setup ---
@@ -239,7 +253,7 @@ class Cog1(commands.Cog):
                 message = await channel.fetch_message(payload.message_id)
                 pinned_text = message.content
                 pinned_by = message.author
-                destination_channel = self.bot.get_channel(1386081055592681552)
+                destination_channel = self.bot.get_channel(1389744403366678583)
 
                 # Get or create webhook for the destination channel
                 webhooks = await destination_channel.webhooks()
@@ -278,17 +292,22 @@ class Cog1(commands.Cog):
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def rape(self, ctx, target: discord.Member = None):
         if target is None:
-            await ctx.send("You need to mention someone to rape!", delete_after=30)
+            await ctx.send("You need to mention someone to rape!", delete_after=120)
             return
         if target == ctx.author:
-            await ctx.send("You can't rape yourself... or can you? 🤨", delete_after=30)
+            await ctx.send("You can't rape yourself... or can you? 廊", delete_after=120)
             return
 
-        msg = random.choice(self.kiss_messages).format(
+        msg = random.choice(self.rape_messages).format(
             author=ctx.author.mention,
             target=target.mention
         )
-        await ctx.send(msg, delete_after=120)
+        gif_url = random.choice(self.rape_gifs)
+
+        embed = discord.Embed(description=msg)
+        embed.set_image(url=gif_url)
+
+        await ctx.send(embed=embed, delete_after=30)
         
     @rape.error
     async def rape_error(self, ctx, error):
