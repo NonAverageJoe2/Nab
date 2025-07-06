@@ -38,22 +38,6 @@ class Cog1(commands.Cog):
             "{author} rapes {target} repeatedly, causing them immense pain and suffering",
             "{author} rapes {target} at 5013 baldpate drive, corpus christi texas, 78413",
         ]
-        self.rape_gifs = [
-            "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGIycWQ1bDhuNDRqaTZxdzRpenFtZHd2MjA4Zm5ncDZuMjg2dGZhdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ML9Ay0Cc6VjrdF4yvi/giphy.gif",  # Replace with actual GIF URLs
-            "https://img4.gelbooru.com//images/2c/60/2c6097d3418da78adbe192edad63d54f.gif",
-            "https://img.xbooru.com//images/515/f2b190ece18afdf913c24385fb338e35.gif?563331",
-            "https://img4.gelbooru.com//images/c8/62/c8629efe2abddfdc2e2e1e9485733666.gif",
-            "https://img4.gelbooru.com//samples/77/fe/sample_77fe9ba14dea38888e08d9e82c567d27.jpg",
-            "https://img4.gelbooru.com/images/4c/6d/4c6d755c877295cece288efaccee0e8d.gif",
-            "https://img4.gelbooru.com//images/c3/54/c3546b2689fd19d5c408f9b8e1f34ffb.gif",
-            "https://img4.gelbooru.com/images/0c/dc/0cdcc44257c5f51cc25ba640f8bf4a3a.gif",
-            "https://n1.kemono.su/data/6a/fc/6afcb8ccad73188a96b252be78c1e3ababada345a1b8a6f312af5ef36d0cc1a5.gif?f=Reisen+Tentacle+Pit+01.gif",
-            "https://24.media.tumblr.com/16ff3889dcfc9e34a75c836a85659457/tumblr_mn37lbOSxz1snbskwo1_500.gif",
-            "https://api-cdn.rule34.xxx/images/999/cf2bde8b46722ca49c0d957235ce0d8bfcb85f4f.gif",
-            "https://i.kym-cdn.com/photos/images/newsfeed/000/996/606/a6a.gif",
-            # Add more GIF URLs here
-        ]
-        self.used_gifs = set()
 
 
     # --- Bump Reminder Setup ---
@@ -121,16 +105,9 @@ class Cog1(commands.Cog):
         conn.commit()
         conn.close()
         
-    def get_random_gif(self):
+    await def get_random_gif(self):
         """Gets a random GIF, avoiding recently used ones."""
-        available_gifs = [gif for gif in self.rape_gifs if gif not in self.used_gifs]
-        if not available_gifs:
-            # If all GIFs have been used recently, reset the used_gifs set
-            self.used_gifs = set()
-            available_gifs = self.rape_gifs
-
-        gif_url = random.choice(available_gifs)
-        self.used_gifs.add(gif_url)
+        gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/anal/gif",timeout=3).json()["link"]
         return gif_url
 
     def save_bump_times(self):
@@ -301,8 +278,7 @@ class Cog1(commands.Cog):
                         username=username,
                         avatar_url=avatar_url
                     )
-               
-
+        
     @commands.command(name="rape")
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def rape(self, ctx, target: discord.Member = None):
@@ -317,7 +293,7 @@ class Cog1(commands.Cog):
             author=ctx.author.mention,
             target=target.mention
         )
-        gif_url = self.get_random_gif()
+        gif_url = await self.get_random_gif()
 
         embed = discord.Embed(description=msg)
         embed.set_image(url=gif_url)
