@@ -127,6 +127,18 @@ class Cog1(commands.Cog):
         }
         with open(self.bump_times_file, "w") as f:
             json.dump(data_to_save, f, indent=4)
+            
+    def get_random_gif(self):
+        """Gets a random GIF, avoiding recently used ones."""
+        available_gifs = [gif for gif in self.rape_gifs if gif not in self.used_gifs]
+        if not available_gifs:
+            # If all GIFs have been used recently, reset the used_gifs set
+            self.used_gifs = set()
+            available_gifs = self.rape_gifs
+
+        gif_url = random.choice(available_gifs)
+        self.used_gifs.add(gif_url)
+        return gif_url
 
     async def _schedule_bump_reminder(self, guild_id: str, delay: float):
         """Schedules and sends a DM reminder after a specified delay."""
@@ -288,26 +300,31 @@ class Cog1(commands.Cog):
                     )
                
 
-    @commands.command(name="rape")
+     @commands.command(name="rape")
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def rape(self, ctx, target: discord.Member = None):
         if target is None:
-            await ctx.send("You need to mention someone to rape!", delete_after=120)
+            await ctx.send("You need to mention someone to rape!", delete_after=30)
             return
         if target == ctx.author:
-            await ctx.send("You can't rape yourself... or can you? 廊", delete_after=120)
+            await ctx.send("You can't rape yourself... or can you? 廊", delete_after=30)
             return
 
         msg = random.choice(self.rape_messages).format(
             author=ctx.author.mention,
             target=target.mention
         )
-        gif_url = random.choice(self.rape_gifs)
+        gif_url = self.get_random_gif()
 
         embed = discord.Embed(description=msg)
         embed.set_image(url=gif_url)
 
         await ctx.send(embed=embed, delete_after=30)
+        
+        # Schedule removal from used_gifs after cooldown
+        await asyncio.sleep(self.gif_cooldown)
+        if gif_url in self.used_gifs:
+            self.used_gifs.remove(gif_url)
         
     @rape.error
     async def rape_error(self, ctx, error):
@@ -360,6 +377,16 @@ class Cog1(commands.Cog):
             print(f"[WARNING] Could not delete message from {ctx.author}.")
 
         await ctx.send(message)
+    
+    @commands.command(name="testgifs")
+    @commands.has_permissions(administrator=True)
+    async def testgifs(self, ctx):
+        """Posts all rape_gifs to the channel for testing embedding."""
+        for gif_url in self.rape_gifs:
+            embed = discord.Embed(title="GIF Test")
+            embed.set_image(url=gif_url)
+            await ctx.send(embed=embed)
+            await asyncio.sleep(1)  # Add a small delay to prevent rate limiting
 
     @say.error
     async def say_error(self, ctx, error):
