@@ -106,9 +106,12 @@ class Cog1(commands.Cog):
         conn.commit()
         conn.close()
         
-    async def get_random_gif(self):
+    async def get_random_gif(self,type="rape"):
         """Gets a random GIF, avoiding recently used ones."""
-        gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/anal/gif",timeout=3).json()["link"]
+        if type == "rape":
+            gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/anal/gif",timeout=3).json()["link"]
+        elif type == "gay":
+            gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/yaoi/gif",timeout=3).json()["link"]
         return gif_url
 
     def save_bump_times(self):
@@ -294,18 +297,44 @@ class Cog1(commands.Cog):
             author=ctx.author.mention,
             target=target.mention
         )
-        gif_url = await self.get_random_gif()
+        gif_url = await self.get_random_gif("rape")
 
         embed = discord.Embed(description=msg)
         embed.set_image(url=gif_url)
 
-        await ctx.send(embed=embed, delete_after=30)
+        await ctx.send(embed=embed, delete_after=60)
         
         # Schedule removal from used_gifs after cooldown
         await asyncio.sleep(self.gif_cooldown)
         if gif_url in self.used_gifs:
             self.used_gifs.remove(gif_url)
+
+
+    @commands.command(name="gay")
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
+    async def gay(self, ctx, target: discord.Member = None):
+        if ctx.author.id == "1387821242798833746":
+            await ctx.send("nuh uh <3", delete_after=30)
+        if target is None:
+            await ctx.send("You need to mention someone !", delete_after=30)
+            return
+        if target == ctx.author:
+            await ctx.send("You are gay...", delete_after=30)
+            return
+
+        msg = f"{target.mention} is gay."
+        gif_url = await self.get_random_gif("gay")
+
+        embed = discord.Embed(description=msg)
+        embed.set_image(url=gif_url)
+
+        await ctx.send(embed=embed, delete_after=60)
         
+        # Schedule removal from used_gifs after cooldown
+        await asyncio.sleep(self.gif_cooldown)
+        if gif_url in self.used_gifs:
+            self.used_gifs.remove(gif_url)
+    
     @rape.error
     async def rape_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
