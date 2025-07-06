@@ -158,10 +158,6 @@ class ReputationCog(commands.Cog):
         if is_booster:
             breakdown_text += f"**Booster Bonus:** ×{booster_multiplier} → {original_base_impact * booster_multiplier}\n"
         
-        if consecutive_count > 1:
-            breakdown_text += f"**Consecutive Bonus:** ×{consecutive_multiplier:.1f} (#{consecutive_count} consecutive {'up' if increase else 'down'})\n"
-            breakdown_text += f"**Final Calculation:** {base_impact} × {consecutive_multiplier:.1f} = {final_impact}\n"
-        
         breakdown_text += f"**Applied Change:** {'+' if increase else '-'}{abs(delta)}"
         
         embed.add_field(name="Calculation Breakdown", value=breakdown_text, inline=False)
@@ -705,15 +701,26 @@ class ReputationCog(commands.Cog):
             await ctx.send("You can't affect others' scores.", delete_after=30)
             return
 
+        # Get consecutive multiplier
+        consecutive_multiplier, consecutive_count = self.get_consecutive_multiplier(ctx.author.id, user.id, ctx.guild.id, True)
+
+        # Apply consecutive multiplier and round to nearest whole number
+        final_impact = round(impact * consecutive_multiplier)
+
         # Update usage tracking (in-memory)
         self.update_rep_usage(ctx.author.id, ctx.guild.id)
-        self.adjust_rep(user.id, ctx.guild.id, impact)
+        self.adjust_rep(user.id, ctx.guild.id, final_impact)
 
         embed = discord.Embed(
             title=" Reputation Increased",
-            description=f"{user.mention} received **+{impact}** reputation from {ctx.author.mention}",
+            description=f"{user.mention} received **+{final_impact}** reputation from {ctx.author.mention}",
             color=0x00ff00
         )
+
+        # ADD THIS SECTION HERE
+        if consecutive_count > 1:
+            embed.add_field(name="Consecutive Bonus", value=f"#{consecutive_count} consecutive up", inline=False)
+
         new_rep = self.get_user_rep(user.id, ctx.guild.id)
         new_tier, _ = self.get_tier_info(new_rep)
         embed.add_field(name="New Score", value=f"{new_rep} ({new_tier})", inline=False)
@@ -755,15 +762,26 @@ class ReputationCog(commands.Cog):
             await ctx.send("You can't affect others' scores.", delete_after=30)
             return
 
+        # Get consecutive multiplier
+        consecutive_multiplier, consecutive_count = self.get_consecutive_multiplier(ctx.author.id, user.id, ctx.guild.id, False)
+
+        # Apply consecutive multiplier and round to nearest whole number
+        final_impact = round(impact * consecutive_multiplier)
+
         # Update usage tracking (in-memory)
         self.update_rep_usage(ctx.author.id, ctx.guild.id)
-        self.adjust_rep(user.id, ctx.guild.id, -impact)
+        self.adjust_rep(user.id, ctx.guild.id, -final_impact)
 
         embed = discord.Embed(
             title=" Reputation Decreased",
-            description=f"{user.mention} lost **-{impact}** reputation from {ctx.author.mention}",
+            description=f"{user.mention} lost **-{final_impact}** reputation from {ctx.author.mention}",
             color=0xff0000
         )
+
+        # ADD THIS SECTION HERE
+        if consecutive_count > 1:
+            embed.add_field(name="Consecutive Bonus", value=f"#{consecutive_count} consecutive down", inline=False)
+
         new_rep = self.get_user_rep(user.id, ctx.guild.id)
         new_tier, _ = self.get_tier_info(new_rep)
         embed.add_field(name="New Score", value=f"{new_rep} ({new_tier})", inline=False)
