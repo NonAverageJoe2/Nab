@@ -20,7 +20,7 @@ class Cog1(commands.Cog):
         self.invite_cache = {}
         self.tracked_invite_code = "qnDWXbzywE"
         self.role_name = "lunatic"  # Role to assign
-        self.kiss_messages = [
+        self.rape_messages = [
             "{author} rapes {target} brutally",
             "{author} and {target} share a passionate rapesesh",
             "{author} sneakily rapes {target}",
@@ -38,6 +38,23 @@ class Cog1(commands.Cog):
             "{author} rapes {target} repeatedly, causing them immense pain and suffering",
             "{author} rapes {target} at 5013 baldpate drive, corpus christi texas, 78413",
         ]
+        self.rape_gifs = [
+            "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGIycWQ1bDhuNDRqaTZxdzRpenFtZHd2MjA4Zm5ncDZuMjg2dGZhdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ML9Ay0Cc6VjrdF4yvi/giphy.gif",  # Replace with actual GIF URLs
+            "https://img4.gelbooru.com//images/2c/60/2c6097d3418da78adbe192edad63d54f.gif",
+            "https://img.xbooru.com//images/515/f2b190ece18afdf913c24385fb338e35.gif?563331",
+            "https://img4.gelbooru.com//images/c8/62/c8629efe2abddfdc2e2e1e9485733666.gif",
+            "https://img4.gelbooru.com//samples/77/fe/sample_77fe9ba14dea38888e08d9e82c567d27.jpg",
+            "https://img4.gelbooru.com/images/4c/6d/4c6d755c877295cece288efaccee0e8d.gif",
+            "https://img4.gelbooru.com//images/c3/54/c3546b2689fd19d5c408f9b8e1f34ffb.gif",
+            "https://img4.gelbooru.com/images/0c/dc/0cdcc44257c5f51cc25ba640f8bf4a3a.gif",
+            "https://n1.kemono.su/data/6a/fc/6afcb8ccad73188a96b252be78c1e3ababada345a1b8a6f312af5ef36d0cc1a5.gif?f=Reisen+Tentacle+Pit+01.gif",
+            "https://24.media.tumblr.com/16ff3889dcfc9e34a75c836a85659457/tumblr_mn37lbOSxz1snbskwo1_500.gif",
+            "https://api-cdn.rule34.xxx/images/999/cf2bde8b46722ca49c0d957235ce0d8bfcb85f4f.gif",
+            "https://i.kym-cdn.com/photos/images/newsfeed/000/996/606/a6a.gif",
+            # Add more GIF URLs here
+        ]
+        self.used_gifs = set()
+
 
     # --- Bump Reminder Setup ---
         self.disboard_bot_id = 302050872324835328 # Official Disboard bot ID
@@ -103,6 +120,18 @@ class Cog1(commands.Cog):
                        (message_id, webhook_message_id))
         conn.commit()
         conn.close()
+        
+    def get_random_gif(self):
+        """Gets a random GIF, avoiding recently used ones."""
+        available_gifs = [gif for gif in self.rape_gifs if gif not in self.used_gifs]
+        if not available_gifs:
+            # If all GIFs have been used recently, reset the used_gifs set
+            self.used_gifs = set()
+            available_gifs = self.rape_gifs
+
+        gif_url = random.choice(available_gifs)
+        self.used_gifs.add(gif_url)
+        return gif_url
 
     def save_bump_times(self):
         """Saves current bump times to file."""
@@ -239,7 +268,7 @@ class Cog1(commands.Cog):
                 message = await channel.fetch_message(payload.message_id)
                 pinned_text = message.content
                 pinned_by = message.author
-                destination_channel = self.bot.get_channel(1386081055592681552)
+                destination_channel = self.bot.get_channel(1389744403366678583)
 
                 # Get or create webhook for the destination channel
                 webhooks = await destination_channel.webhooks()
@@ -281,14 +310,24 @@ class Cog1(commands.Cog):
             await ctx.send("You need to mention someone to rape!", delete_after=30)
             return
         if target == ctx.author:
-            await ctx.send("You can't rape yourself... or can you? 🤨", delete_after=30)
+            await ctx.send("You can't rape yourself... or can you? 廊", delete_after=30)
             return
 
-        msg = random.choice(self.kiss_messages).format(
+        msg = random.choice(self.rape_messages).format(
             author=ctx.author.mention,
             target=target.mention
         )
-        await ctx.send(msg, delete_after=30)
+        gif_url = self.get_random_gif()
+
+        embed = discord.Embed(description=msg)
+        embed.set_image(url=gif_url)
+
+        await ctx.send(embed=embed, delete_after=30)
+        
+        # Schedule removal from used_gifs after cooldown
+        await asyncio.sleep(self.gif_cooldown)
+        if gif_url in self.used_gifs:
+            self.used_gifs.remove(gif_url)
         
     @rape.error
     async def rape_error(self, ctx, error):
@@ -296,6 +335,16 @@ class Cog1(commands.Cog):
             minutes = int(error.retry_after // 60)
             seconds = int(error.retry_after % 60)
             await ctx.send(f"⏳ You need to wait {minutes}m {seconds}s before using `rape` again.", delete_after=10)
+            
+    @commands.command(name="testgifs")
+    @commands.has_permissions(administrator=True)
+    async def testgifs(self, ctx):
+        """Posts all rape_gifs to the channel for testing embedding."""
+        for gif_url in self.rape_gifs:
+            embed = discord.Embed(title="GIF Test")
+            embed.set_image(url=gif_url)
+            await ctx.send(embed=embed)
+            await asyncio.sleep(1)  # Add a small delay to prevent rate limiting
 
     @commands.command()
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)  # 1 use every 10 seconds per user
