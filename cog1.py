@@ -106,7 +106,7 @@ class Cog1(commands.Cog):
         conn.commit()
         conn.close()
         
-    await def get_random_gif(self):
+    async def get_random_gif(self):
         """Gets a random GIF, avoiding recently used ones."""
         gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/anal/gif",timeout=3).json()["link"]
         return gif_url
