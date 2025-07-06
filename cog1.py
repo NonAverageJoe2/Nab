@@ -288,7 +288,7 @@ class Cog1(commands.Cog):
             author=ctx.author.mention,
             target=target.mention
         )
-        await ctx.send(msg, delete_after=30)
+        await ctx.send(msg, delete_after=120)
         
     @rape.error
     async def rape_error(self, ctx, error):
