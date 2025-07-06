@@ -5,6 +5,7 @@ import random
 import json
 import sqlite3
 import asyncio
+import requests
 import re
 from datetime import datetime
 from discord.ext import commands
