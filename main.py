@@ -137,13 +137,9 @@ async def on_command_error(ctx, error):
         embed.title = "Unexpected Error"
         embed.description = "An unexpected error occurred. Please try again later."
     
-    # Send as ephemeral message (only visible to the user)
-    try:
-        await ctx.author.send(embed=embed)
-    except discord.Forbidden:
-        # If DMs are disabled, send in channel but delete after 10 seconds
-        msg = await ctx.send(embed=embed)
-        await msg.delete(delay=10)
+    #TODO: Send as ephemeral message (only visible to the user)
+    msg = await ctx.send(embed=embed)
+    await msg.delete(delay=10)
 
 bot_token = os.getenv("BOT_TOKEN")
 if __name__ == '__main__':
