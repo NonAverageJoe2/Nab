@@ -317,12 +317,11 @@ class Cog1(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def testgifs(self, ctx):
         """Posts all rape_gifs to the channel for testing embedding."""
-        for gif_url in self.rape_gifs:
-            embed = discord.Embed(title="GIF Test")
-            embed.set_image(url=gif_url)
-            await ctx.send(embed=embed)
-            await asyncio.sleep(1)  # Add a small delay to prevent rate limiting
-
+        gif_url = await self.get_random_gif()
+        embed = discord.Embed(title="GIF Test")
+        embed.set_image(url=gif_url)
+        await ctx.send(embed=embed)
+        
     @commands.command()
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)  # 1 use every 10 seconds per user
     async def whois(self, ctx, user: discord.Member):
