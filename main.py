@@ -44,7 +44,7 @@ async def on_app_command_error(interaction: discord.Interaction, error):
     else:
         print(f"Unexpected slash command error: {error}")
         embed.title = "Unexpected Error"
-        embed.description = "An unexpected error occurred. Please try again later."
+        embed.description = "An unexpected error occurred. Please try again later.\n"+str(error)
     
     # Send ephemeral message (only visible to the user)
     if interaction.response.is_done():
