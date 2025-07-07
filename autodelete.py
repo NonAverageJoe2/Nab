@@ -6,9 +6,10 @@ from collections import defaultdict
 from typing import Optional
 from datetime import datetime, timezone, timedelta
 
-def has_i_role():
+def has_required_role():
     async def predicate(ctx):
-        return discord.utils.get(ctx.author.roles, name="I") is not None
+        required_roles = ["I", "II", "III"]
+        return any(discord.utils.get(ctx.author.roles, name=role) is not None for role in required_roles)
     return commands.check(predicate)
 
 class AutoDelete(commands.Cog):
@@ -40,7 +41,7 @@ class AutoDelete(commands.Cog):
 
 
     @commands.command()
-    @has_i_role()
+    @has_required_role()
     async def autodelete(self, ctx, limit: int, time: int, unit: str):
         """Sets an autodelete limit and timer for chat, e.g., ~autodelete 50 5 hours"""
         channel = ctx.channel
@@ -51,10 +52,10 @@ class AutoDelete(commands.Cog):
 
         self.config[str(channel.id)] = {"limit": limit, "time": time}
         await self.save_config()
-        await ctx.send(f"🗑️ Auto delete set to delete messages after {limit} messages or {time} seconds in {channel.mention}")
+        await ctx.send(f"️ Auto delete set to delete messages after {limit} messages or {time} seconds in {channel.mention}")
 
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @has_required_role()
     async def clear(self, ctx, amount: Optional[int] = None):
         """Clears the given amount of messages in chat, e.g., ~clear 20"""
         if amount is None:
@@ -72,7 +73,7 @@ class AutoDelete(commands.Cog):
         await ctx.channel.delete_messages(messages)
 
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @has_required_role()
     async def clearold(self, ctx, amount: Optional[int] = None):
         """Clears the given amount of **oldest** messages in chat, e.g., ~clearold 20"""
         if amount is None:
@@ -121,11 +122,11 @@ class AutoDelete(commands.Cog):
 
            
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @has_required_role()
     async def autodeletestatus(self, ctx):
         """Check if the autodelete loop is running"""
         running = self.process_queues.is_running()
-        await ctx.send(f"🟢 AutoDelete loop running: `{running}`")
+        await ctx.send(f" AutoDelete loop running: `{running}`")
         
     @tasks.loop(minutes=5)
     async def watchdog(self):
