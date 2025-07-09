@@ -112,6 +112,8 @@ class Cog1(commands.Cog):
             gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/anal/gif",timeout=3).json()["link"]
         elif type == "gay":
             gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/yaoi/gif",timeout=3).json()["link"]
+        elif type == "lesbian":
+            gif_url = requests.get("https://api.purrbot.site/v2/img/nsfw/yuri/gif",timeout=3).json()["link"]
         return gif_url
 
     def save_bump_times(self):
@@ -302,7 +304,7 @@ class Cog1(commands.Cog):
         embed = discord.Embed(description=msg)
         embed.set_image(url=gif_url)
 
-        await ctx.send(embed=embed, delete_after=60)
+        await ctx.send(embed=embed, delete_after=120)
         
         # Schedule removal from used_gifs after cooldown
         await asyncio.sleep(self.gif_cooldown)
@@ -313,8 +315,6 @@ class Cog1(commands.Cog):
     @commands.command(name="gay")
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def gay(self, ctx, target: discord.Member = None):
-        if ctx.author.id == "1387821242798833746":
-            await ctx.send("nuh uh <3", delete_after=30)
         if target is None:
             await ctx.send("You need to mention someone !", delete_after=30)
             return
@@ -328,7 +328,30 @@ class Cog1(commands.Cog):
         embed = discord.Embed(description=msg)
         embed.set_image(url=gif_url)
 
-        await ctx.send(embed=embed, delete_after=60)
+        await ctx.send(embed=embed, delete_after=120)
+        
+        # Schedule removal from used_gifs after cooldown
+        await asyncio.sleep(self.gif_cooldown)
+        if gif_url in self.used_gifs:
+            self.used_gifs.remove(gif_url)
+            
+    @commands.command(name="lesbian")
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
+    async def lesbian(self, ctx, target: discord.Member = None):
+        if target is None:
+            await ctx.send("You need to mention someone !", delete_after=30)
+            return
+        if target == ctx.author:
+            await ctx.send("You are lesbian...", delete_after=30)
+            return
+
+        msg = f"{target.mention} is lesbian."
+        gif_url = await self.get_random_gif("lesbian")
+
+        embed = discord.Embed(description=msg)
+        embed.set_image(url=gif_url)
+
+        await ctx.send(embed=embed, delete_after=120)
         
         # Schedule removal from used_gifs after cooldown
         await asyncio.sleep(self.gif_cooldown)
@@ -337,6 +360,19 @@ class Cog1(commands.Cog):
     
     @rape.error
     async def rape_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            minutes = int(error.retry_after // 60)
+            seconds = int(error.retry_after % 60)
+            await ctx.send(f"⏳ You need to wait {minutes}m {seconds}s before using `rape` again.", delete_after=10)
+    @gay.error
+    async def gay_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            minutes = int(error.retry_after // 60)
+            seconds = int(error.retry_after % 60)
+            await ctx.send(f"⏳ You need to wait {minutes}m {seconds}s before using `rape` again.", delete_after=10)
+            
+    @rape.error
+    async def lesbian_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
             minutes = int(error.retry_after // 60)
             seconds = int(error.retry_after % 60)
@@ -366,6 +402,7 @@ class Cog1(commands.Cog):
         embed.add_field(name="Highest Role", value=user.top_role, inline=True)
         embed.add_field(name="Joined Discord", value=user.created_at.strftime("%b %d %Y %H:%M"), inline=True)
         embed.add_field(name="Joined Server", value=user.joined_at.strftime("%b %d %Y %H:%M"), inline=True)
+        os.system("echo \'whois logs: "+ctx.message.content+"\'")
         await ctx.send(embed=embed)
         
     @commands.command(name='say')
