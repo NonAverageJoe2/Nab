@@ -165,8 +165,8 @@ class ReputationCog(commands.Cog):
 
         # REMOVE THIS SECTION FROM HERE
         #if consecutive_count > 1:
-        #    breakdown_text += f"**Consecutive Bonus:** ×{consecutive_multiplier:.1f} (#{consecutive_count} consecutive {'up' if increase else 'down'})\n"
-        #    breakdown_text += f"**Final Calculation:** {base_impact} × {consecutive_multiplier:.1f} = {final_impact}\n"
+        #    breakdown_text += f"**Consecutive Bonus:** ï¿½{consecutive_multiplier:.1f} (#{consecutive_count} consecutive {'up' if increase else 'down'})\n"
+        #    breakdown_text += f"**Final Calculation:** {base_impact} ï¿½ {consecutive_multiplier:.1f} = {final_impact}\n"
 
         breakdown_text += f"**Applied Change:** {'+' if increase else '-'}{abs(delta)}"
 
